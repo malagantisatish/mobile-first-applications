@@ -1,23 +1,38 @@
 import {useState,useEffect} from "react"
+import {TailSpin} from "react-loader-spinner"
 import "./index.css"
+
+const apiStatus = {
+    initial: 'INITIAL',
+    success: 'SUCCESS',
+    inProcess: 'PROCESS',
+    failure: 'FAIL',
+  }
+  
 
 const Home =()=>{
     const [jokesArr,setJokesArr]=useState([])
+    const [status,setStatus] = useState('INITIAL')
 
     useEffect(()=>{
         const fetchJoke=async()=>{
+            setStatus("PROCESS")
             const response = await fetch("https://v2.jokeapi.dev/joke/any?format=json&blacklistFlags=nsfw,sexist&type=single&lang=EN&amount=10")
             const data = await response.json()
             console.log(data)
             setJokesArr(data.jokes)
+            setStatus("SUCCESS")
         }
         fetchJoke()
     },[])
 
+   const renderTheLoader = () => (
+        <div className="loader-container">
+          <TailSpin color="#F7931E" height={50} width={50} />
+        </div>
+      )
 
-    return(
-        <div className="home-page">
-            <h1>Home</h1>
+    const renderTheTable=()=>(
             <table>
                 <thead>
                 <tr className="headings">
@@ -42,8 +57,30 @@ const Home =()=>{
                 ))}
                 </tbody>
             </table>
-        </div>
+     
+      )
 
+      const renderTheView = () => {
+        switch (status) {
+          case apiStatus.inProcess:
+            return renderTheLoader()
+          case apiStatus.success:
+            return renderTheTable()
+    
+          default:
+            return null
+        }
+      }
+
+
+    return(
+        <>
+        <div className="home-page">
+            <h1>Home</h1>
+            {renderTheView()}
+        </div>
+        </>
+        
     )
 }
 
